@@ -1,5 +1,5 @@
 <h1 align="center"> 
-   XebBeC Crypto
+   XeBeC Crypto
 </h1>
 <div align="center">
    <h4 align="center"> 
@@ -8,10 +8,11 @@
  
  <h3 align="center"> <strong>Demo:</strong> https://cryptoapp98.web.app/ </h3>
    <p>Frontend deployed on firebase</p>
- 
-</div>![FireShot Capture 003 - Multi Device Website Mockup Generator - techsini com](https://user-images.githubusercontent.com/53532191/123317229-67764600-d54b-11eb-92ae-04cd959894ec.png)
-
-
+   
+<img align="center" width="600" alt="crypto currency' user interface on desktop and mobile" src="https://user-images.githubusercontent.com/53532191/123317415-9e4c5c00-d54b-11eb-9466-112c8eb4a46a.png">
+     </div>
+   
+ <hr>
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
