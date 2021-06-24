@@ -6,7 +6,7 @@ const SignIn = () => {
     <>
       <Container>
         <FormWrap>
-          <Icon to='/'>dolla</Icon>
+          <Icon to='/'>XeBeC Crypto</Icon>
           <FormContent>
             <Form action='#'>
               <FormH1>Sign in to your account</FormH1>
