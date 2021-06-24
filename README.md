@@ -7,7 +7,7 @@
  <h3 align="center">React, Node.js, Express, Styled-Components</h3>
  <h3 align="center"> <strong>Demo:</strong> https://cryptoapp98.web.app/ </h3>
    <p>Frontend deployed on firebase</p>   
-<img align="center" width="600" alt="crypto currency' user interface on desktop and mobile" src="https://user-images.githubusercontent.com/53532191/123317415-9e4c5c00-d54b-11eb-9466-112c8eb4a46a.png">
+<img align="center" width="600" alt="crypto currency' user interface on desktop and mobile" src="src/images/mockup.png">
      </div>
    
  <hr>
