@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-    - main # Adjust the branch name according to your repository's default branch
+    - master # Adjust the branch name according to your repository's default branch
 
 stages:
 - stage: Build
