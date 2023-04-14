@@ -74,9 +74,30 @@ stages:
               azureResourceGroup: 'dev-rg'
               kubernetesCluster: 'demo-cluster'
               useClusterAdmin: true
-              command: 'set'
+              command: 'apply'
               useConfigurationFile: true
-              configuration: 'k8s/deployment.yaml'
+              configurationType: 'inline'
+              inline: |
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  name: deployment
+                  namespace: default
+                spec:
+                  replicas: 1
+                  selector:
+                    matchLabels:
+                      app: crypto-app
+                  template:
+                    metadata:
+                      labels:
+                        app: crypto-app
+                    spec:
+                      containers:
+                      - name: $(imageName)
+                        image: $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
+                        ports:
+                        - containerPort: 80
               arguments: |
                 - script: |
                     kubectl set image deployment/$(k8sDeploymentName) $(containerName)=acr234346.azurecr.io/crypt-react-app:$(Build.BuildId) --namespace=$(k8sNamespace) --record
@@ -94,7 +115,21 @@ stages:
               useClusterAdmin: true
               command: 'apply'
               useConfigurationFile: true
-              configuration: 'k8s/service.yaml'
+              configurationType: 'inline'
+              inline: |
+                apiVersion: v1
+                kind: Service
+                metadata:
+                  name: crypto-app-service
+                  namespace: default
+                spec:
+                  selector:
+                    app: crypto-app
+                  ports:
+                    - protocol: TCP
+                      port: 80
+                      targetPort: 80
+                  type: LoadBalancer
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
               workingDirectory: '$(System.DefaultWorkingDirectory)/k8s'
