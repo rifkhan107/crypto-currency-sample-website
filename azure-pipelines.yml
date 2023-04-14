@@ -1,15 +1,13 @@
 trigger:
   branches:
     include:
-    - master 
+    - master
 
 variables:
   acrName: 'acr234346'
   imageName: 'crypt-react-app'
   k8sNamespace: 'default'
   k8sDeploymentName: 'deployment'
-  CACHE_FOLDER: $(Pipeline.Workspace)/cache/
-  SYSDIG_SECURE_ENDPOINT: "https://eu1.app.sysdig.com"
 
 stages:
 - stage: Build
@@ -37,33 +35,21 @@ stages:
       displayName: 'Build and Push Docker image'
       inputs:
         containerRegistry: 'docker-reg'
-        repository: '$(imageName)'
+        repository: '$(acrName).azurecr.io/$(imageName)'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
         tags: '$(Build.BuildId)'
 
     - script: |
-        curl -sLO https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt
-        mkdir -p $(CACHE_FOLDER)/db/
-        if [ ! -f $(CACHE_FOLDER)/latest_version.txt ] || [ $(cat ./latest_version.txt) != $(cat $(CACHE_FOLDER)/latest_version.txt) ]; then
-          cp ./latest_version.txt $(CACHE_FOLDER)/latest_version.txt
-          curl -sL -o $(CACHE_FOLDER)/sysdig-cli-scanner "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(cat $(CACHE_FOLDER)/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
-          chmod +x $(CACHE_FOLDER)/sysdig-cli-scanner
-        else
-          echo "sysdig-cli-scanner latest version already downloaded"
-        fi
-      displayName: Download the sysdig-cli-scanner if needed
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+      displayName: Install Trivy
 
     - script: |
-        $(CACHE_FOLDER)/sysdig-cli-scanner \
-          --apiurl $(SYSDIG_SECURE_ENDPOINT) \
-          --console-log \
-          --dbpath=$(CACHE_FOLDER)/db/ \
-          --cachepath=$(CACHE_FOLDER)/scanner-cache/ \
-          docker://$(acrName).azurecr.io/$(imageName):$(Build.BuildId) \
-      displayName: Run the sysdig-cli-scanner
-      env:
-        SECURE_API_TOKEN: $(TOKEN)
+        trivy image --exit-code 1 --severity HIGH,CRITICAL $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
+      displayName: Scan Docker image with Trivy
+
+# Deployment stage remains unchanged
+
 
 - stage: Deploy
   displayName: 'Deploy stage'
