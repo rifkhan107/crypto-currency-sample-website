@@ -12,11 +12,6 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-
-    # - task: Npm@1
-    #   inputs:
-    #     command: 'install'
-    #   displayName: 'Install Node.js'
         
     - task: NodeTool@0
       inputs:
@@ -28,20 +23,6 @@ stages:
         npm run build
       displayName: 'Build React App'
 
-    # - task: ArchiveFiles@2
-    #   displayName: 'Archive files'
-    #   inputs:
-    #     rootFolderOrFile: '$(System.DefaultWorkingDirectory)/build' # The output folder after running `npm run build`
-    #     includeRootFolder: false
-    #     archiveType: 'zip'
-    #     archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-    #     replaceExistingArchive: true
-
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    #     ArtifactName: 'drop'
-    #     publishLocation: 'Container'
     - task: Docker@2
       inputs:
         containerRegistry: 'docker-reg'
@@ -64,12 +45,6 @@ stages:
       runOnce:
         deploy:
           steps:
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'drop'
-              downloadPath: '$(System.ArtifactsDirectory)'
 
           - task: AzureRmWebAppDeployment@4
             inputs:
@@ -77,5 +52,8 @@ stages:
               azureSubscription: 'my-connection'
               appType: 'webAppContainer'
               WebAppName: 'crypto-web-app'
+              DockerNamespace: 'acr234346.azurecr.io/acr234346:39'
+              DockerRepository: 'acr234346'
+              DockerImageTag: '39'
               
               
