@@ -77,7 +77,9 @@ stages:
               command: 'set'
               useConfigurationFile: true
               configuration: 'k8s/deployment.yaml'
-              arguments: 'kubectl set image deployment/$(k8sDeploymentName) $(containerName)=acr234346.azurecr.io/crypt-react-app:$(Build.BuildId) --namespace=$(k8sNamespace) --record'
+              arguments: |
+                - script: |
+                    kubectl set image deployment/$(k8sDeploymentName) $(containerName)=acr234346.azurecr.io/crypt-react-app:$(Build.BuildId) --namespace=$(k8sNamespace) --record
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
               workingDirectory: '$(System.DefaultWorkingDirectory)/k8s'
