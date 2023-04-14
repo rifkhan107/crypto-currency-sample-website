@@ -19,14 +19,6 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - checkout: self
-    - script: |
-        pwd
-        ls -la $(System.DefaultWorkingDirectory)
-      displayName: 'List repository root folder contents'
-
-    - script: git status
-      displayName: 'Git status'
-
 
     - task: NodeTool@0
       inputs:
@@ -98,9 +90,7 @@ stages:
                         image: $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
                         ports:
                         - containerPort: 80
-              arguments: |
-                - script: |
-                    kubectl set image deployment/$(k8sDeploymentName) $(containerName)=acr234346.azurecr.io/crypt-react-app:$(Build.BuildId) --namespace=$(k8sNamespace) --record
+              arguments: ''
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
               workingDirectory: '$(System.DefaultWorkingDirectory)/k8s'
