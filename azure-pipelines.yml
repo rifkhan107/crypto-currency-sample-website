@@ -3,6 +3,12 @@ trigger:
     include:
     - master # Adjust the branch name according to your repository's default branch
 
+variables:
+  acrName: 'acr234346'
+  imageName: 'crypt-react-app'
+  k8sNamespace: 'default'
+  k8sDeploymentName: 'k8s-deployment'
+
 stages:
 - stage: Build
   displayName: 'Build stage'
@@ -12,24 +18,26 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-        
+
     - task: NodeTool@0
       inputs:
         versionSpec: '16.x'
       displayName: 'Install Node.js'
 
-    - script: |
-        npm ci
-        npm run build
-      displayName: 'Build React App'
-
     - task: Docker@2
+      displayName: 'Login to ACR'
       inputs:
         containerRegistry: 'docker-reg'
-        repository: 'acr234346'
+        command: 'login'
+
+    - task: Docker@2
+      displayName: 'Build and Push Docker image'
+      inputs:
+        containerRegistry: 'docker-reg'
+        repository: '$(acrName).azurecr.io/$(imageName)'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
-  
+        tags: '$(Build.BuildId)'
 
 - stage: Deploy
   displayName: 'Deploy stage'
@@ -46,15 +54,34 @@ stages:
         deploy:
           steps:
 
-          - task: AzureRmWebAppDeployment@4
+          - task: Kubernetes@1
+            displayName: 'Deploy to AKS'
             inputs:
-              ConnectionType: 'AzureRM'
-              azureSubscription: 'my-connection'
-              appType: 'webAppContainer'
-              WebAppName: 'crypto-web-app'
-              DockerNamespace: 'acr234346.azurecr.io/acr234346:39'
-              DockerRepository: 'acr234346'
-              DockerImageTag: '39'
-              StartupCommand: 'docker run -p 5000:5000 -d acr234346.azurecr.io/acr234346:39'
-              
-              
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: 'k8s-con'
+              namespace: 'default'
+              command: 'apply'
+              useConfigurationFile: true
+              configuration: |
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  name: $(k8sDeploymentName)
+                  namespace: $(k8sNamespace)
+                spec:
+                  replicas: 1
+                  selector:
+                    matchLabels:
+                      app: $(k8sDeploymentName)
+                  template:
+                    metadata:
+                      labels:
+                        app: $(k8sDeploymentName)
+                    spec:
+                      containers:
+                      - name: $(imageName)
+                        image: $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
+                        ports:
+                        - containerPort: 80
+              secretType: 'dockerRegistry'
+              containerRegistryType: 'Azure Container Registry'
