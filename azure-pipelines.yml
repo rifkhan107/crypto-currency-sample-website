@@ -67,6 +67,7 @@ stages:
               configuration: 'k8s/deployment.yaml'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
+              workingDirectory: '$(Build.SourcesDirectory)'
 
           - task: Kubernetes@1
             displayName: 'Deploy Service to AKS'
@@ -81,3 +82,4 @@ stages:
               configuration: 'k8s/service.yaml'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
+              workingDirectory: '$(Build.SourcesDirectory)'
