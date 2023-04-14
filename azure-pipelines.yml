@@ -31,7 +31,7 @@ stages:
 
 
 - stage: Build
-  displayName: 'Build the Application'
+  displayName: 'Build stage'
   dependsOn: Test
   condition: succeeded()
   jobs:
