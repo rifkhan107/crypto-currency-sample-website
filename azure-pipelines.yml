@@ -19,6 +19,11 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - checkout: self
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
+      displayName: 'Install Node.js'
     - script: |
         npm ci
         npm run test
@@ -36,10 +41,10 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - checkout: self
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '16.x'
-      displayName: 'Install Node.js'
+    # - task: NodeTool@0
+    #   inputs:
+    #     versionSpec: '16.x'
+    #   displayName: 'Install Node.js'
     - task: Docker@2
       displayName: 'Build Docker image'
       inputs:
@@ -64,6 +69,12 @@ stages:
         containerRegistry: 'docker-reg'
         repository: '$(imageName)'
         command: 'login'
+    - task: Docker@2
+      displayName: 'Push Docker image'
+      inputs:
+        containerRegistry: 'docker-reg'
+        repository: '$(imageName)'
+        command: 'push'
     - task: trivy@1
       inputs:
         version: 'latest'
@@ -72,12 +83,7 @@ stages:
         image: $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
         ignoreUnfixed: true
       displayName: Scan Docker image with Trivy
-    - task: Docker@2
-      displayName: 'Push Docker image'
-      inputs:
-        containerRegistry: 'docker-reg'
-        repository: '$(imageName)'
-        command: 'push'
+
     
 - stage: Deploy
   displayName: 'Deploy stage'
