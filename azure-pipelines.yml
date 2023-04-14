@@ -55,5 +55,6 @@ stages:
               DockerNamespace: 'acr234346.azurecr.io/acr234346:39'
               DockerRepository: 'acr234346'
               DockerImageTag: '39'
+              StartupCommand: 'docker run -p 5000:5000 -d acr234346'
               
               
