@@ -37,7 +37,9 @@ stages:
         containerRegistry: 'docker-reg'
         repository: '$(imageName)'
         command: 'login'
-
+    - task: DockerInstaller@0
+      inputs:
+        dockerVersion: '17.09.0-ce'
     - task: trivy@1
       inputs:
         version: 'latest'
