@@ -37,7 +37,7 @@ stages:
       displayName: 'Build and Push Docker image'
       inputs:
         containerRegistry: 'docker-reg'
-        repository: '$(acrName).azurecr.io/$(imageName)'
+        repository: '$(imageName)'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
         tags: '$(Build.BuildId)'
@@ -111,7 +111,7 @@ stages:
                       - name: $(imageName)
                         image: $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
                         ports:
-                        - containerPort: 80
+                        - containerPort: 5000
               arguments: ''
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
@@ -140,7 +140,7 @@ stages:
                   ports:
                     - protocol: TCP
                       port: 80
-                      targetPort: 80
+                      targetPort: 5000
                   type: LoadBalancer
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
