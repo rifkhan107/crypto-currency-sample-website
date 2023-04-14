@@ -74,9 +74,10 @@ stages:
               azureResourceGroup: 'dev-rg'
               kubernetesCluster: 'demo-cluster'
               useClusterAdmin: true
-              command: 'apply'
+              command: 'set'
               useConfigurationFile: true
               configuration: 'k8s/deployment.yaml'
+              arguments: 'kubectl set image deployment/deployment container-name=$(acrName).azurecr.io/$(imageName):$(Build.BuildId) --namespace=default --record'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
               workingDirectory: '$(System.DefaultWorkingDirectory)/k8s'
