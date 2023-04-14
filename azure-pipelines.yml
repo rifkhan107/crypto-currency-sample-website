@@ -24,13 +24,6 @@ stages:
       inputs:
         versionSpec: '16.x'
       displayName: 'Install Node.js'
-
-    - task: Docker@2
-      displayName: 'Login to ACR'
-      inputs:
-        containerRegistry: 'docker-reg'
-        command: 'login'
-
     - task: Docker@2
       displayName: 'Build Docker image'
       inputs:
@@ -38,7 +31,13 @@ stages:
         repository: '$(imageName)'
         command: 'build'
         Dockerfile: '**/Dockerfile'
-    
+    - task: Docker@2
+      displayName: 'Login to ACR'
+      inputs:
+        containerRegistry: 'docker-reg'
+        repository: '$(imageName)'
+        command: 'login'
+
     - task: trivy@1
       inputs:
         version: 'latest'
