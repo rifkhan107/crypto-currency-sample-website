@@ -42,7 +42,12 @@ stages:
     #     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     #     ArtifactName: 'drop'
     #     publishLocation: 'Container'
-
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'docker-reg'
+        repository: 'acr234346'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
   
 
 - stage: Deploy
@@ -70,8 +75,7 @@ stages:
             inputs:
               ConnectionType: 'AzureRM'
               azureSubscription: 'my-connection'
-              appType: 'webAppLinux'
-              WebAppName: 'web-app23'
-              packageForLinux: '$(System.ArtifactsDirectory)/drop/$(Build.BuildId).zip'
+              appType: 'webAppContainer'
+              WebAppName: 'crypto-web-app'
               
               
