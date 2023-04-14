@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $(k8sDeploymentName)
+  namespace: $(k8sNamespace)
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: $(k8sDeploymentName)
+  template:
+    metadata:
+      labels:
+        app: $(k8sDeploymentName)
+    spec:
+      containers:
+      - name: $(imageName)
+        image: $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
+        ports:
+        - containerPort: 80
