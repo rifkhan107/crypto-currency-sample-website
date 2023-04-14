@@ -3,6 +3,12 @@ trigger:
     include:
     - master # Adjust the branch name according to your repository's default branch
 
+variables:
+  acrName: 'acr234346'
+  imageName: 'crypt-react-app'
+  k8sNamespace: 'default'
+  k8sDeploymentName: 'k8s-deployment'
+
 stages:
 - stage: Build
   displayName: 'Build stage'
@@ -13,35 +19,25 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
 
-    # - task: Npm@1
-    #   inputs:
-    #     command: 'install'
-    #   displayName: 'Install Node.js'
-        
     - task: NodeTool@0
       inputs:
         versionSpec: '16.x'
       displayName: 'Install Node.js'
 
-    - script: |
-        npm ci
-        npm run build
-      displayName: 'Build React App'
-
-    - task: ArchiveFiles@2
-      displayName: 'Archive files'
+    - task: Docker@2
+      displayName: 'Login to ACR'
       inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/build' # The output folder after running `npm run build`
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-        replaceExistingArchive: true
+        containerRegistry: 'docker-reg'
+        command: 'login'
 
-    - task: PublishBuildArtifacts@1
+    - task: Docker@2
+      displayName: 'Build and Push Docker image'
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
+        containerRegistry: 'docker-reg'
+        repository: '$(acrName).azurecr.io/$(imageName)'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(Build.BuildId)'
 
 - stage: Deploy
   displayName: 'Deploy stage'
@@ -57,19 +53,35 @@ stages:
       runOnce:
         deploy:
           steps:
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'drop'
-              downloadPath: '$(System.ArtifactsDirectory)'
 
-          - task: AzureRmWebAppDeployment@4
+          - task: Kubernetes@1
+            displayName: 'Deploy to AKS'
             inputs:
-              ConnectionType: 'AzureRM'
-              azureSubscription: 'my-connection'
-              appType: 'webAppLinux'
-              WebAppName: 'web-app23'
-              packageForLinux: '$(System.ArtifactsDirectory)/drop/$(Build.BuildId).zip'
-              
-              
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: 'k8s-con'
+              namespace: 'default'
+              command: 'apply'
+              useConfigurationFile: true
+              configuration: |
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  name: $(k8sDeploymentName)
+                  namespace: $(k8sNamespace)
+                spec:
+                  replicas: 1
+                  selector:
+                    matchLabels:
+                      app: $(k8sDeploymentName)
+                  template:
+                    metadata:
+                      labels:
+                        app: $(k8sDeploymentName)
+                    spec:
+                      containers:
+                      - name: $(imageName)
+                        image: $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
+                        ports:
+                        - containerPort: 80
+              secretType: 'dockerRegistry'
+              containerRegistryType: 'Azure Container Registry'
