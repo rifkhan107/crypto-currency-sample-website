@@ -53,6 +53,8 @@ stages:
       runOnce:
         deploy:
           steps:
+          - script: ls -la $(System.DefaultWorkingDirectory)/k8s
+            displayName: 'List k8s folder contents'
 
           - task: Kubernetes@1
             displayName: 'Deploy Deployment to AKS'
@@ -67,7 +69,7 @@ stages:
               configuration: 'k8s/deployment.yaml'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
-              workingDirectory: '$(Build.SourcesDirectory)'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/k8s'
 
           - task: Kubernetes@1
             displayName: 'Deploy Service to AKS'
@@ -82,4 +84,4 @@ stages:
               configuration: 'k8s/service.yaml'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
-              workingDirectory: '$(Build.SourcesDirectory)'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/k8s'
