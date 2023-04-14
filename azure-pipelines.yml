@@ -11,6 +11,31 @@ variables:
 
 
 stages:
+- stage: Test
+  displayName: 'Test stage'
+  jobs:
+  - job: Test
+    displayName: 'Test Job'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        npm ci
+        npm run test
+      displayName: 'Run tests'
+- stage: Test
+  displayName: 'Test stage'
+  jobs:
+  - job: Test
+    displayName: 'Test Job'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        npm ci
+        npm run test
+      displayName: 'Run tests'
+
 - stage: Build
   displayName: 'Build the Application'
   dependsOn: Test
