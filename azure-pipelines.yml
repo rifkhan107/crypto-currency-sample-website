@@ -7,7 +7,7 @@ variables:
   acrName: 'acr234346'
   imageName: 'crypt-react-app'
   k8sNamespace: 'default'
-  k8sDeploymentName: 'k8s-deployment'
+  k8sDeploymentName: 'deployment'
 
 stages:
 - stage: Build
