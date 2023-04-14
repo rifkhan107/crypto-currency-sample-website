@@ -62,6 +62,7 @@ stages:
       runOnce:
         deploy:
           steps:
+          - checkout: self
           - script: ls -la $(System.DefaultWorkingDirectory)/k8s
             displayName: 'List k8s folder contents'
 
