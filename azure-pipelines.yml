@@ -40,6 +40,16 @@ stages:
         Dockerfile: '**/Dockerfile'
         tags: '$(Build.BuildId)'
 
+- stage: Scan
+  displayName: 'Scan stage'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: Scan
+    displayName: 'Scan Job'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
     - script: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
       displayName: Install Trivy
@@ -47,8 +57,6 @@ stages:
     - script: |
         trivy image --exit-code 1 --severity HIGH,CRITICAL $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
       displayName: Scan Docker image with Trivy
-
-# Deployment stage remains unchanged
 
 
 - stage: Deploy
