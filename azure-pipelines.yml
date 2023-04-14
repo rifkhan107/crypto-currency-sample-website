@@ -1,13 +1,15 @@
 trigger:
   branches:
     include:
-    - master # Adjust the branch name according to your repository's default branch
+    - master 
 
 variables:
   acrName: 'acr234346'
   imageName: 'crypt-react-app'
   k8sNamespace: 'default'
   k8sDeploymentName: 'deployment'
+  CACHE_FOLDER: $(Pipeline.Workspace)/cache/
+  SYSDIG_SECURE_ENDPOINT: "https://eu1.app.sysdig.com"
 
 stages:
 - stage: Build
@@ -40,6 +42,29 @@ stages:
         Dockerfile: '**/Dockerfile'
         tags: '$(Build.BuildId)'
 
+    - script: |
+        curl -sLO https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt
+        mkdir -p $(CACHE_FOLDER)/db/
+        if [ ! -f $(CACHE_FOLDER)/latest_version.txt ] || [ $(cat ./latest_version.txt) != $(cat $(CACHE_FOLDER)/latest_version.txt) ]; then
+          cp ./latest_version.txt $(CACHE_FOLDER)/latest_version.txt
+          curl -sL -o $(CACHE_FOLDER)/sysdig-cli-scanner "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(cat $(CACHE_FOLDER)/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
+          chmod +x $(CACHE_FOLDER)/sysdig-cli-scanner
+        else
+          echo "sysdig-cli-scanner latest version already downloaded"
+        fi
+      displayName: Download the sysdig-cli-scanner if needed
+
+    - script: |
+        $(CACHE_FOLDER)/sysdig-cli-scanner \
+          --apiurl $(SYSDIG_SECURE_ENDPOINT) \
+          --console-log \
+          --dbpath=$(CACHE_FOLDER)/db/ \
+          --cachepath=$(CACHE_FOLDER)/scanner-cache/ \
+          docker://$(acrName).azurecr.io/$(imageName):$(Build.BuildId) \
+      displayName: Run the sysdig-cli-scanner
+      env:
+        SECURE_API_TOKEN: $(TOKEN)
+
 - stage: Deploy
   displayName: 'Deploy stage'
   dependsOn: Build
@@ -55,9 +80,6 @@ stages:
         deploy:
           steps:
           - checkout: self
-          - script: ls -la $(System.DefaultWorkingDirectory)/k8s
-            displayName: 'List k8s folder contents'
-
           - task: Kubernetes@1
             displayName: 'Deploy Deployment to AKS'
             inputs:
