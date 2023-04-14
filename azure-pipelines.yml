@@ -32,30 +32,25 @@ stages:
         command: 'login'
 
     - task: Docker@2
-      displayName: 'Build and Push Docker image'
+      displayName: 'Build Docker image'
       inputs:
         containerRegistry: 'docker-reg'
-        repository: '$(acrName).azurecr.io/$(imageName)'
-        command: 'buildAndPush'
+        repository: '$(imageName)'
+        command: 'build'
         Dockerfile: '**/Dockerfile'
-        tags: '$(Build.BuildId)'
-
-- stage: Scan
-  displayName: 'Scan stage'
-  dependsOn: Build
-  condition: succeeded()
-  jobs:
-  - job: Scan
-    displayName: 'Scan Job'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
+    
     - task: trivy@1
       inputs:
         version: 'latest'
-        loginDockerConfig: true
         image: '$(acrName).azurecr.io/$(imageName):$(Build.BuildId)'
-
+      displayName: Scan Docker image with Trivy
+    - task: Docker@2
+      displayName: 'Push Docker image'
+      inputs:
+        containerRegistry: 'docker-reg'
+        repository: '$(imageName)'
+        command: 'push'
+    
 - stage: Deploy
   displayName: 'Deploy stage'
   dependsOn: Build
