@@ -19,6 +19,14 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - checkout: self
+    - script: |
+        pwd
+        ls -la $(System.DefaultWorkingDirectory)
+      displayName: 'List repository root folder contents'
+
+    - script: git status
+      displayName: 'Git status'
+
 
     - task: NodeTool@0
       inputs:
