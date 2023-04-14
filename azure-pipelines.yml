@@ -18,6 +18,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - checkout: self
 
     - task: NodeTool@0
       inputs:
