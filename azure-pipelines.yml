@@ -73,7 +73,6 @@ stages:
         docker: false
         loginDockerConfig: true
         image: acr234346.azurecr.io/crypt-react-app:83
-        # $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
         ignoreUnfixed: true
       displayName: Scan Docker image with Trivy
 
