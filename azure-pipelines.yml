@@ -98,7 +98,6 @@ stages:
                         image: $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
                         ports:
                         - containerPort: 5000
-              arguments: ''
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
               workingDirectory: '$(System.DefaultWorkingDirectory)/k8s'
