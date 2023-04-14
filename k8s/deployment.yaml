@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: $(k8sDeploymentName)
-  namespace: $(k8sNamespace)
+  namespace: default
 spec:
   replicas: 1
   selector:
